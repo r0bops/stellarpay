@@ -20,9 +20,9 @@ export const useWalletStore = create<WalletState>((set, get) => ({
   connect: async () => {
     set({ isConnecting: true, error: null });
     try {
-      // Dynamic import to avoid SSR issues
       const freighter = await import('@stellar/freighter-api');
 
+      // Check if Freighter is installed
       const isConnected = await freighter.isConnected();
       if (!isConnected) {
         throw new Error(
@@ -30,9 +30,33 @@ export const useWalletStore = create<WalletState>((set, get) => ({
         );
       }
 
-      const publicKey = await freighter.getPublicKey();
+      // Request access first (this triggers the Freighter popup)
+      if (freighter.requestAccess) {
+        await freighter.requestAccess();
+      }
+
+      // Get the public key — try the new API first, fall back to legacy
+      let publicKey: string | null = null;
+
+      if (freighter.getAddress) {
+        // New API (Freighter v5+)
+        const addressResult = await freighter.getAddress();
+        if (addressResult && typeof addressResult === 'object' && 'address' in addressResult) {
+          publicKey = (addressResult as any).address;
+        } else if (typeof addressResult === 'string') {
+          publicKey = addressResult;
+        }
+      }
+
+      if (!publicKey && freighter.getPublicKey) {
+        // Legacy API fallback
+        publicKey = await freighter.getPublicKey();
+      }
+
       if (!publicKey) {
-        throw new Error('Failed to get public key from Freighter');
+        throw new Error(
+          'Could not get public key. Please unlock Freighter and try again.'
+        );
       }
 
       set({
@@ -42,11 +66,12 @@ export const useWalletStore = create<WalletState>((set, get) => ({
         error: null,
       });
     } catch (error: any) {
+      const message = error?.message || 'Failed to connect wallet';
       set({
         connected: false,
         publicKey: null,
         isConnecting: false,
-        error: error.message || 'Failed to connect wallet',
+        error: message,
       });
       throw error;
     }
@@ -69,9 +94,25 @@ export const useWalletStore = create<WalletState>((set, get) => ({
 
     try {
       const freighter = await import('@stellar/freighter-api');
-      const signedXdr = await freighter.signTransaction(xdr, {
-        networkPassphrase: config.networkPassphrase,
-      });
+
+      let signedXdr: string;
+
+      if (freighter.signTransaction) {
+        const result = await freighter.signTransaction(xdr, {
+          networkPassphrase: config.networkPassphrase,
+        });
+        // New API returns an object, legacy returns a string
+        if (typeof result === 'string') {
+          signedXdr = result;
+        } else if (result && typeof result === 'object' && 'signedTxXdr' in result) {
+          signedXdr = (result as any).signedTxXdr;
+        } else {
+          throw new Error('Unexpected response from Freighter');
+        }
+      } else {
+        throw new Error('Freighter signTransaction not available');
+      }
+
       return signedXdr;
     } catch (error: any) {
       throw new Error(error.message || 'Transaction signing failed');
