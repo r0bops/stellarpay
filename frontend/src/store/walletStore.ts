@@ -31,26 +31,28 @@ export const useWalletStore = create<WalletState>((set, get) => ({
       }
 
       // Request access first (this triggers the Freighter popup)
-      if (freighter.requestAccess) {
-        await freighter.requestAccess();
+      const f = freighter as any;
+
+      if (f.requestAccess) {
+        await f.requestAccess();
       }
 
       // Get the public key — try the new API first, fall back to legacy
       let publicKey: string | null = null;
 
-      if (freighter.getAddress) {
+      if (f.getAddress) {
         // New API (Freighter v5+)
-        const addressResult = await freighter.getAddress();
+        const addressResult = await f.getAddress();
         if (addressResult && typeof addressResult === 'object' && 'address' in addressResult) {
-          publicKey = (addressResult as any).address;
+          publicKey = addressResult.address;
         } else if (typeof addressResult === 'string') {
           publicKey = addressResult;
         }
       }
 
-      if (!publicKey && freighter.getPublicKey) {
-        // Legacy API fallback
-        publicKey = await freighter.getPublicKey();
+      if (!publicKey && f.getPublicKey) {
+        // Legacy API (Freighter v2)
+        publicKey = await f.getPublicKey();
       }
 
       if (!publicKey) {
