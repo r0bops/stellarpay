@@ -16,9 +16,9 @@ export default function WalletConnect({ variant = 'compact' }: WalletConnectProp
 
     return (
       <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-1 border border-surface-3">
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted border border-border">
           <span className="w-2 h-2 rounded-full bg-emerald-400" />
-          <span className="text-sm font-mono text-ink-1">
+          <span className="text-sm font-mono text-foreground">
             {truncateAddress(publicKey)}
           </span>
         </div>
@@ -53,7 +53,7 @@ export default function WalletConnect({ variant = 'compact' }: WalletConnectProp
           )}
         </button>
         {error && (
-          <p className="text-xs text-danger text-center">{error}</p>
+          <p className="text-xs text-destructive text-center">{error}</p>
         )}
       </div>
     );

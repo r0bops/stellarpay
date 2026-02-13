@@ -47,24 +47,20 @@ export default function InvoiceList() {
 
   return (
     <div className="animate-in">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold text-ink-0">Invoices</h2>
-        <Link to="/create" className="btn-primary text-sm">
-          + New Invoice
-        </Link>
+      <div className="mb-6 flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-foreground">Invoices</h2>
+        <Link to="/dashboard/create" className="btn-primary text-sm">+ New Invoice</Link>
       </div>
 
-      {/* Filters */}
-      <div className="flex items-center gap-2 mb-4">
+      <div className="mb-4 flex items-center gap-2">
         {STATUS_FILTERS.map((f) => (
           <button
             key={f.value}
             onClick={() => setFilter(f.value)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+            className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition-all ${
               filter === f.value
-                ? 'bg-stellar-50 text-stellar-700 border border-stellar-200'
-                : 'text-ink-3 hover:bg-surface-1 border border-transparent'
+                ? 'border-primary/30 bg-primary/10 text-primary'
+                : 'border-transparent text-muted-foreground hover:bg-muted'
             }`}
           >
             {f.label}
@@ -72,70 +68,47 @@ export default function InvoiceList() {
         ))}
       </div>
 
-      {/* Table */}
       {loading ? (
-        <div className="card p-12 text-center text-ink-3 text-sm">
-          Loading invoices...
-        </div>
+        <div className="card p-12 text-center text-sm text-muted-foreground">Loading invoices...</div>
       ) : invoices.length === 0 ? (
         <div className="card p-12 text-center">
-          <p className="text-ink-3 text-sm mb-3">No invoices found</p>
-          <Link to="/create" className="btn-primary text-sm">
-            Create Your First Invoice
-          </Link>
+          <p className="mb-3 text-sm text-muted-foreground">No invoices found</p>
+          <Link to="/dashboard/create" className="btn-primary text-sm">Create Your First Invoice</Link>
         </div>
       ) : (
         <div className="card overflow-hidden">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-surface-3 bg-surface-1">
-                <th className="text-left px-4 py-3 text-xs font-medium text-ink-3 uppercase tracking-wider">
-                  Invoice
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-ink-3 uppercase tracking-wider">
-                  Client
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-ink-3 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="text-right px-4 py-3 text-xs font-medium text-ink-3 uppercase tracking-wider">
-                  Amount
-                </th>
-                <th className="text-right px-4 py-3 text-xs font-medium text-ink-3 uppercase tracking-wider">
-                  Date
-                </th>
+              <tr className="border-b border-border bg-muted">
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Invoice</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Client</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Status</th>
+                <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">Amount</th>
+                <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">Date</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-surface-3">
+            <tbody className="divide-y divide-border">
               {invoices.map((invoice) => (
-                <tr
-                  key={invoice.id}
-                  className="hover:bg-surface-1 transition-colors"
-                >
+                <tr key={invoice.id} className="transition-colors hover:bg-muted">
                   <td className="px-4 py-3">
-                    <Link
-                      to={`/invoices/${invoice.id}`}
-                      className="text-sm font-medium text-stellar-600 hover:text-stellar-700"
-                    >
+                    <Link to={`/dashboard/invoices/${invoice.id}`} className="text-sm font-medium text-primary hover:brightness-110">
                       {invoice.invoiceNumber}
                     </Link>
-                    <p className="text-xs text-ink-3 mt-0.5">{invoice.title}</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">{invoice.title}</p>
                   </td>
                   <td className="px-4 py-3">
-                    <p className="text-sm text-ink-1">{invoice.clientName}</p>
-                    <p className="text-xs text-ink-3">{invoice.clientEmail}</p>
+                    <p className="text-sm text-foreground">{invoice.clientName}</p>
+                    <p className="text-xs text-muted-foreground">{invoice.clientEmail}</p>
                   </td>
                   <td className="px-4 py-3">
-                    <InvoiceStatusBadge
-                      status={invoice.status as InvoiceStatus}
-                    />
+                    <InvoiceStatusBadge status={invoice.status as InvoiceStatus} />
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <span className="text-sm font-mono font-medium text-ink-0">
+                    <span className="font-mono text-sm font-medium text-foreground">
                       {formatAmount(invoice.total, invoice.currency)}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-right text-sm text-ink-3">
+                  <td className="px-4 py-3 text-right text-sm text-muted-foreground">
                     {formatDate(invoice.createdAt)}
                   </td>
                 </tr>
