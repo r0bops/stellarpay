@@ -5,6 +5,7 @@ import ThemeToggle from './ThemeToggle';
 
 const NAV_ITEMS = [
   { path: '/dashboard', label: 'Dashboard', icon: 'D' },
+  { path: '/dashboard/clients', label: 'Clients', icon: 'C' },
   { path: '/dashboard/invoices', label: 'Invoices', icon: 'I' },
   { path: '/dashboard/create', label: 'Create Invoice', icon: '+' },
 ];

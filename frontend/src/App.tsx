@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
+import Clients from './pages/Clients';
 import CreateInvoice from './pages/CreateInvoice';
 import InvoiceList from './components/Invoice/InvoiceList';
 import InvoiceDetail from './components/Invoice/InvoiceDetail';
@@ -57,6 +58,7 @@ export default function App() {
           {/* App routes with sidebar layout */}
           <Route path="/dashboard" element={<Layout />}>
             <Route index element={<Dashboard />} />
+            <Route path="clients" element={<Clients />} />
             <Route path="invoices" element={<InvoiceList />} />
             <Route path="invoices/:id" element={<InvoiceDetail />} />
             <Route path="create" element={<CreateInvoice />} />

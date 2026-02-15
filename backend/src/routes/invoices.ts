@@ -1,11 +1,13 @@
 import { Router, Request, Response } from 'express';
 import { invoiceService } from '../services/invoiceService';
+import { clientService } from '../services/clientService';
 import {
   validateBody,
   requireWallet,
   createInvoiceSchema,
 } from '../middleware/validation';
 import { InvoiceStatus } from '@prisma/client';
+import { CreateInvoiceInput } from '../types';
 
 const router = Router();
 
@@ -20,15 +22,35 @@ router.post(
   async (req: Request, res: Response) => {
     try {
       const walletAddress = (req as any).walletAddress;
+      const {
+        saveClient,
+        favoriteClient,
+        ...invoiceInput
+      }: CreateInvoiceInput = req.body;
 
       // Ensure the freelancer wallet matches the authenticated wallet
-      if (req.body.freelancerWallet !== walletAddress) {
+      if (invoiceInput.freelancerWallet !== walletAddress) {
         return res.status(403).json({
           error: 'Freelancer wallet must match authenticated wallet',
         });
       }
 
-      const invoice = await invoiceService.createInvoice(req.body);
+      const invoice = await invoiceService.createInvoice(invoiceInput);
+
+      if (saveClient) {
+        try {
+          await clientService.upsertClient(walletAddress, {
+            name: invoice.clientName,
+            email: invoice.clientEmail,
+            company: invoice.clientCompany ?? undefined,
+            address: invoice.clientAddress ?? undefined,
+            isFavorite: favoriteClient ?? false,
+          });
+        } catch (clientError) {
+          console.error('Save client from invoice error:', clientError);
+        }
+      }
+
       res.status(201).json(invoice);
     } catch (error: any) {
       console.error('Create invoice error:', error);
@@ -65,6 +87,30 @@ router.get('/stats', requireWallet, async (req: Request, res: Response) => {
     res.json(stats);
   } catch (error: any) {
     console.error('Stats error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * GET /api/invoices/:id/owner
+ * Get invoice details for authenticated freelancer only
+ */
+router.get('/:id/owner', requireWallet, async (req: Request, res: Response) => {
+  try {
+    const walletAddress = (req as any).walletAddress;
+    const invoice = await invoiceService.getInvoice(req.params.id);
+
+    if (!invoice) {
+      return res.status(404).json({ error: 'Invoice not found' });
+    }
+
+    if (invoice.freelancerWallet !== walletAddress) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    res.json(invoice);
+  } catch (error: any) {
+    console.error('Get owner invoice error:', error);
     res.status(500).json({ error: error.message });
   }
 });

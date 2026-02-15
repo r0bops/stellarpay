@@ -1,10 +1,16 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { getInvoice, createPayIntent, submitPayment, getPaymentStatus } from '../../services/api';
+import { Link, useParams } from 'react-router-dom';
+import {
+  getInvoice,
+  getOwnerInvoice,
+  createPayIntent,
+  submitPayment,
+  getPaymentStatus,
+} from '../../services/api';
 import { useWalletStore } from '../../store/walletStore';
 import InvoiceStatusBadge from '../Invoice/InvoiceStatusBadge';
 import WalletConnect from '../Wallet/WalletConnect';
-import type { Invoice, InvoiceStatus } from '../../types';
+import type { PublicInvoice, InvoiceStatus } from '../../types';
 import { CURRENCY_SYMBOLS, config } from '../../config';
 
 type PayStep = 'loading' | 'view' | 'connect' | 'paying' | 'confirming' | 'success' | 'error';
@@ -12,10 +18,11 @@ type PayStep = 'loading' | 'view' | 'connect' | 'paying' | 'confirming' | 'succe
 export default function PaymentFlow() {
   const { id } = useParams<{ id: string }>();
   const { connected, publicKey, signTransaction } = useWalletStore();
-  const [invoice, setInvoice] = useState<Invoice | null>(null);
+  const [invoice, setInvoice] = useState<PublicInvoice | null>(null);
   const [step, setStep] = useState<PayStep>('loading');
   const [error, setError] = useState<string | null>(null);
   const [txHash, setTxHash] = useState<string | null>(null);
+  const [canOpenFreelancerView, setCanOpenFreelancerView] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -54,6 +61,17 @@ export default function PaymentFlow() {
 
     return () => clearInterval(interval);
   }, [step, id]);
+
+  useEffect(() => {
+    if (!id || !connected || !publicKey) {
+      setCanOpenFreelancerView(false);
+      return;
+    }
+
+    getOwnerInvoice(id, publicKey)
+      .then(() => setCanOpenFreelancerView(true))
+      .catch(() => setCanOpenFreelancerView(false));
+  }, [id, connected, publicKey]);
 
   const handlePay = async () => {
     if (!invoice || !publicKey || !id) return;
@@ -240,6 +258,14 @@ export default function PaymentFlow() {
                   >
                     View on Stellar Explorer →
                   </a>
+                )}
+                {canOpenFreelancerView && (
+                  <Link
+                    to={`/dashboard/invoices/${invoice.id}`}
+                    className="btn-secondary w-full text-sm"
+                  >
+                    Open Freelancer Invoice View
+                  </Link>
                 )}
               </div>
             )}

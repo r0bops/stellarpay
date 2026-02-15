@@ -1,5 +1,5 @@
 import { Link, NavLink, Outlet } from 'react-router-dom';
-import { ArrowRight, Wallet, Zap } from 'lucide-react';
+import { ArrowRight, Globe2, Heart, Wallet, Zap } from 'lucide-react';
 import { useWalletStore } from '../../store/walletStore';
 import ThemeToggle from '../ThemeToggle';
 
@@ -10,11 +10,14 @@ const NAV_ITEMS = [
   { path: '/about', label: 'About' },
 ];
 
-const FOOTER_LINKS = [
+const FOOTER_PRODUCT = [
+  { label: 'Features', to: '/features' },
   { label: 'Pricing', to: '/pricing' },
+  { label: 'Dashboard', to: '/get-started' },
+];
+
+const FOOTER_COMPANY = [
   { label: 'About', to: '/about' },
-  { label: 'GitHub', to: '#' },
-  { label: 'Twitter', to: '#' },
   { label: 'Terms', to: '#' },
   { label: 'Privacy', to: '#' },
 ];
@@ -125,44 +128,79 @@ export default function MarketingLayout() {
       </main>
 
       <footer className="mt-24 border-t border-border bg-card">
-        <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-          <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <div className="mb-2 flex items-center gap-2">
+        <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+            {/* Brand */}
+            <div className="sm:col-span-2 lg:col-span-2">
+              <div className="mb-3 flex items-center gap-2">
                 <span className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
                   <Zap className="h-4 w-4" />
                 </span>
                 <span className="font-semibold text-foreground">Link2Pay</span>
               </div>
-              <p className="max-w-md text-sm text-muted-foreground">
-                Decentralized invoicing on Stellar for freelancers, startups, and global teams.
+              <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
+                The simplest way to invoice clients and get paid anywhere in the world.
+                Built on the Stellar network for speed, low cost, and full control over your money.
               </p>
+              <div className="mt-4 flex items-center gap-1 text-xs text-muted-foreground">
+                <Globe2 className="h-3.5 w-3.5" />
+                <span>Available worldwide on Stellar Testnet</span>
+              </div>
             </div>
 
-            <div className="flex flex-wrap gap-4">
-              {FOOTER_LINKS.map((item) =>
-                item.to.startsWith('/') ? (
-                  <Link
-                    key={item.label}
-                    to={item.to}
-                    className="text-sm text-muted-foreground transition-colors hover:text-primary"
-                  >
-                    {item.label}
-                  </Link>
-                ) : (
-                  <a
-                    key={item.label}
-                    href={item.to}
-                    className="text-sm text-muted-foreground transition-colors hover:text-primary"
-                  >
-                    {item.label}
-                  </a>
-                )
-              )}
+            {/* Product links */}
+            <div>
+              <h4 className="mb-3 text-sm font-semibold text-foreground">Product</h4>
+              <ul className="space-y-2">
+                {FOOTER_PRODUCT.map((item) => (
+                  <li key={item.label}>
+                    <Link
+                      to={item.to}
+                      className="text-sm text-muted-foreground transition-colors hover:text-primary"
+                    >
+                      {item.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Company links */}
+            <div>
+              <h4 className="mb-3 text-sm font-semibold text-foreground">Company</h4>
+              <ul className="space-y-2">
+                {FOOTER_COMPANY.map((item) =>
+                  item.to.startsWith('/') ? (
+                    <li key={item.label}>
+                      <Link
+                        to={item.to}
+                        className="text-sm text-muted-foreground transition-colors hover:text-primary"
+                      >
+                        {item.label}
+                      </Link>
+                    </li>
+                  ) : (
+                    <li key={item.label}>
+                      <a
+                        href={item.to}
+                        className="text-sm text-muted-foreground transition-colors hover:text-primary"
+                      >
+                        {item.label}
+                      </a>
+                    </li>
+                  )
+                )}
+              </ul>
             </div>
           </div>
-          <div className="mt-8 border-t border-border pt-4 text-xs text-muted-foreground">
-            Link2Pay on Stellar Testnet
+
+          <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-border pt-6 sm:flex-row">
+            <p className="flex items-center gap-1 text-xs text-muted-foreground">
+              Made with <Heart className="h-3 w-3 text-destructive" /> for freelancers worldwide
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Link2Pay &mdash; Stellar Testnet
+            </p>
           </div>
         </div>
       </footer>
